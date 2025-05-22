@@ -1,11 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import json
-import os
 
 app = FastAPI()
 
-# Enable CORS for all origins
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,20 +12,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load the marks.json file
+# Load marks.json, which is a list of dicts
 try:
     with open("q-vercel-python.json", "r") as f:
-        marks_dict = json.load(f)
+        marks_list = json.load(f)  # List of students
 except Exception as e:
-    print("Failed to load marks.json:", e)
-    marks_dict = {}
+    print("Error loading marks.json:", e)
+    marks_list = []
+
+# Lookup function to find marks by name
+def get_mark_for_name(name):
+    for student in marks_list:
+        if student.get("name") == name:
+            return student.get("marks")
+    return None
 
 @app.get("/api")
 def get_marks(request: Request):
     try:
         names = request.query_params.getlist("name")
-        print("Received names:", names)
-        result = [marks_dict.get(name, None) for name in names]
+        result = [get_mark_for_name(name) for name in names]
         return {"marks": result}
     except Exception as e:
         print("Error in /api:", e)
