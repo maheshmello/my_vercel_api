@@ -13,7 +13,7 @@ app.add_middleware(
 )
 
 # Load the JSON file
-with open("marks.json", "r") as f:
+with open("q-vercel-python.json", "r") as f:
     marks_dict = json.load(f)
 
 @app.get("/api")
